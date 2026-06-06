@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aegis Course Registration - An advanced academic registration portal with real-time planning, cart validations, and administrative CRUD analytics.">
+    <title>Aegis Course Registration Portal</title>
+    <!-- Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="light-mode">
+
+    <!-- Loading Spinner Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main Navigation Bar -->
+    <header class="app-header">
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="brand-text">
+                    <h1>Aegis Portal</h1>
+                    <span class="sub-brand">Course Management System</span>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle-btn" class="icon-btn" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- User Info Badge -->
+                <div id="user-badge" class="user-badge hidden">
+                    <div class="user-avatar" id="user-avatar-initials">U</div>
+                    <div class="user-details">
+                        <span class="user-name" id="user-display-name">Username</span>
+                        <span class="user-role" id="user-display-role">Role</span>
+                    </div>
+                </div>
+
+                <!-- Logout Button -->
+                <button id="logout-btn" class="logout-btn hidden">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Body Container -->
+    <main class="main-content">
+        
+        <!-- ================= AUTH CONTAINER ================= -->
+        <section id="auth-container" class="auth-section">
+            <div class="glass-card auth-card">
+                <div class="auth-card-header">
+                    <h2>Welcome to Aegis Portal</h2>
+                    <p>Enter credentials to access your portal</p>
+                </div>
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" id="login-email" required placeholder="name@university.edu" autocomplete="username">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="login-submit-btn">
+                        <span>Sign In</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    </button>
+                </form>
+                <div class="demo-credentials">
+                    <p class="demo-title"><i class="fa-solid fa-info-circle"></i> Demo Accounts:</p>
+                    <div class="demo-grid">
+                        <div class="demo-item">
+                            <strong>Student 1:</strong> alice@university.edu (Completed CS101)
+                        </div>
+                        <div class="demo-item">
+                            <strong>Student 2:</strong> bob@university.edu (No prerequisites)
+                        </div>
+                        <div class="demo-item">
+                            <strong>Administrator:</strong> admin@university.edu (All Admin Rights)
+                        </div>
+                        <div class="demo-password-note">Password for all accounts: <span>password</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= STUDENT DASHBOARD ================= -->
+        <section id="student-dashboard" class="portal-dashboard hidden">
+            <!-- Summary Stats Panel -->
+            <div class="dashboard-banner">
+                <div class="banner-welcome">
+                    <h2>Hello, <span id="student-welcome-name">Student</span>!</h2>
+                    <p>Major: <span id="student-welcome-major">Undeclared</span></p>
+                </div>
+                <div class="credit-tracker-card glass-card">
+                    <div class="tracker-header">
+                        <span class="tracker-title">Registered Credits Tracker</span>
+                        <span class="tracker-val" id="credit-tracker-value">0 / 18 Credits</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="credit-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="tracker-footer">
+                        <span id="credit-percentage">0% of recommended maximum limit (18 credits)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="student-portal-grid">
+                <!-- Left Section: Catalog -->
+                <div class="catalog-section">
+                    <div class="section-card glass-card">
+                        <div class="catalog-header">
+                            <h3 class="section-title"><i class="fa-solid fa-book-open"></i> Course Catalog</h3>
+                            
+                            <!-- Search & Sorting Controls -->
+                            <div class="search-sort-bar">
+                                <div class="search-wrapper">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="catalog-search" placeholder="Search by course code, title, instructor...">
+                                </div>
+                                <div class="sort-wrapper">
+                                    <label for="catalog-sort">Sort by:</label>
+                                    <select id="catalog-sort">
+                                        <option value="code">Course Code</option>
+                                        <option value="popularity">Popularity (Most Enrolled)</option>
+                                        <option value="credits">Credits</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Advanced Filters Panel -->
+                            <div class="filters-panel">
+                                <span class="filter-panel-title">Filters:</span>
+                                <div class="filters-grid">
+                                    <!-- Department Filters -->
+                                    <div class="filter-group">
+                                        <label>Departments</label>
+                                        <div class="checkbox-group" id="filter-departments">
+                                            <!-- Dynamically filled -->
+                                        </div>
+                                    </div>
+                                    <!-- Credit Filters -->
+                                    <div class="filter-group">
+                                        <label>Credits</label>
+                                        <div class="checkbox-group" id="filter-credits">
+                                            <label class="custom-checkbox">
+                                                <input type="checkbox" value="3" checked> 3 Credits
+                                            </label>
+                                            <label class="custom-checkbox">
+                                                <input type="checkbox" value="4" checked> 4 Credits
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <!-- Availability Filter -->
+                                    <div class="filter-group availability-group">
+                                        <label>Availability</label>
+                                        <label class="custom-toggle">
+                                            <input type="checkbox" id="filter-hide-full">
+                                            <span class="toggle-slider"></span>
+                                            <span class="toggle-text">Hide Full Courses</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Course Catalog Grid -->
+                        <div class="course-grid" id="course-catalog-grid">
+                            <!-- Filled dynamically by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Section: Cart & Registered Schedule -->
+                <div class="sidebar-section">
+                    
+                    <!-- Tentative Planner Cart -->
+                    <div class="sidebar-card glass-card cart-card">
+                        <div class="sidebar-card-header">
+                            <h3><i class="fa-solid fa-cart-shopping"></i> Registration Cart</h3>
+                            <span class="badge" id="cart-badge-count">0</span>
+                        </div>
+                        
+                        <div class="cart-items-list" id="cart-items-container">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-calendar-plus"></i>
+                                <p>Your cart is empty. Add courses from the catalog to plan your schedule.</p>
+                            </div>
+                        </div>
+
+                        <!-- Cart Summary -->
+                        <div class="cart-summary" id="cart-summary-section">
+                            <div class="summary-row">
+                                <span>Cart Credits:</span>
+                                <strong id="cart-total-credits">0 Credits</strong>
+                            </div>
+                            <!-- Validation Warnings Box -->
+                            <div id="cart-validation-warning" class="validation-warning-box hidden">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <span id="cart-warning-text">Schedule conflict detected!</span>
+                            </div>
+                            <button id="cart-submit-btn" class="primary-btn checkout-btn" disabled>
+                                <i class="fa-solid fa-check-double"></i> Submit Registration
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Registered Schedule list -->
+                    <div class="sidebar-card glass-card schedule-card">
+                        <div class="sidebar-card-header">
+                            <h3><i class="fa-solid fa-calendar-days"></i> Active Class Schedule</h3>
+                        </div>
+                        <div class="schedule-items-list" id="schedule-items-container">
+                            <!-- Filled dynamically -->
+                            <div class="empty-state">
+                                <i class="fa-solid fa-calendar-xmark"></i>
+                                <p>You have not registered for any courses yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= ADMIN DASHBOARD ================= -->
+        <section id="admin-dashboard" class="portal-dashboard hidden">
+            <!-- Analytics Cards -->
+            <div class="analytics-row">
+                <div class="analytics-card glass-card">
+                    <div class="analytics-icon bg-indigo">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <span class="analytics-label">Registered Students</span>
+                        <h3 class="analytics-value" id="admin-stat-students">0</h3>
+                    </div>
+                </div>
+
+                <div class="analytics-card glass-card">
+                    <div class="analytics-icon bg-emerald">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                    </div>
+                    <div class="analytics-info">
+                        <span class="analytics-label">Revenue Generated</span>
+                        <h3 class="analytics-value" id="admin-stat-revenue">$0.00</h3>
+                    </div>
+                </div>
+
+                <div class="analytics-card glass-card popular-courses-card">
+                    <div class="popular-courses-header">
+                        <span class="analytics-label"><i class="fa-solid fa-fire"></i> Most Popular Courses</span>
+                    </div>
+                    <ul class="popular-list" id="admin-stat-popular">
+                        <!-- Loaded dynamically -->
+                        <li class="popular-empty">No active registrations yet</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Course CRUD Table Card -->
+            <div class="crud-section-card glass-card">
+                <div class="crud-header">
+                    <h3 class="section-title"><i class="fa-solid fa-sliders"></i> Course Catalog Manager</h3>
+                    <button id="admin-add-course-btn" class="primary-btn add-btn">
+                        <i class="fa-solid fa-plus"></i> Add New Course
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="crud-table" id="courses-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Title</th>
+                                <th>Credits</th>
+                                <th>Remaining/Capacity</th>
+                                <th>Time Slot</th>
+                                <th>Prerequisites</th>
+                                <th>Instructor & Dept</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-courses-tbody">
+                            <!-- Filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= ADD / EDIT COURSE MODAL ================= -->
+    <div id="course-modal" class="modal-overlay hidden">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Course</h3>
+                <button id="modal-close-btn" class="close-btn" aria-label="Close Modal">&times;</button>
+            </div>
+            <form id="course-form" class="modal-form">
+                <input type="hidden" id="course-form-id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="course-form-code">Course Code</label>
+                        <input type="text" id="course-form-code" required placeholder="e.g. CS102">
+                    </div>
+                    <div class="form-group">
+                        <label for="course-form-title">Course Title</label>
+                        <input type="text" id="course-form-title" required placeholder="e.g. Data Structures">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="course-form-desc">Course Description</label>
+                    <textarea id="course-form-desc" rows="3" placeholder="Enter course description details..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="course-form-credits">Credit Hours</label>
+                        <input type="number" id="course-form-credits" required min="1" max="6" value="3">
+                    </div>
+                    <div class="form-group">
+                        <label for="course-form-capacity">Max Seat Capacity</label>
+                        <input type="number" id="course-form-capacity" required min="1" max="100" value="30">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="course-form-instructor">Instructor Name</label>
+                        <input type="text" id="course-form-instructor" required placeholder="e.g. Dr. Grace Hopper">
+                    </div>
+                    <div class="form-group">
+                        <label for="course-form-dept">Department</label>
+                        <input type="text" id="course-form-dept" required placeholder="e.g. Computer Science">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="course-form-timeslot">Class Time Slot</label>
+                        <select id="course-form-timeslot" required>
+                            <!-- Filled dynamically from database -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Prerequisites (Select required completions)</label>
+                    <div class="prereqs-checklist" id="course-form-prereqs">
+                        <!-- Filled dynamically with checkboxes for existing courses -->
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="course-form-cancel-btn" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="primary-btn submit-btn" id="course-form-submit-btn">Save Course</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
